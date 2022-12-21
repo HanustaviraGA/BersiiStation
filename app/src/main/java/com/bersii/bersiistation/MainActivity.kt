@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
     private var etPassword: EditText? = null
     private var email: String? = null
     private var password: String? = null
-    private var device_name: String? = null
 
     private val url = "https://bersii.my.id/api/token"
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,10 +29,8 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         password = ""
         email = password
-        device_name = password
         etEmail = findViewById(R.id.emaillogin)
         etPassword = findViewById(R.id.passwordlogin)
-        device_name = "Testing 1"
         val loginbutton = findViewById<TextView>(R.id.loginbtnlogin)
         loginbutton.setOnClickListener {
             login()
@@ -43,8 +40,7 @@ class MainActivity : AppCompatActivity() {
     private fun login() {
         email = etEmail!!.text.toString().trim { it <= ' ' }
         password = etPassword!!.text.toString().trim { it <= ' ' }
-        device_name = device_name!!.toString().trim { it <= ' ' }
-        if (email != "" && password != "" && device_name != "") {
+        if (email != "" && password != "") {
             val stringRequest: StringRequest = object : StringRequest(
                 Method.POST,
                 url,
@@ -53,8 +49,9 @@ class MainActivity : AppCompatActivity() {
                     val jArray = JSONArray(data)
                     for(i in 0 until jArray.length()){
                         val jobject = jArray.getJSONObject(i)
-                        val id = jobject.getString("id")
-                        if(id != null){
+                        val status = jobject.getString("message")
+                        if(status == "Sukses"){
+                            val id = jobject.getString("id")
                             val nama = jobject.getString("nama")
                             val email = jobject.getString("email")
                             val nomor_telepon = jobject.getString("nomor_telepon")
@@ -63,6 +60,7 @@ class MainActivity : AppCompatActivity() {
                             val intent = Intent(this@MainActivity, DashboardActivity::class.java)
                             val sharedPreference =  getSharedPreferences("USER_DATA", Context.MODE_PRIVATE)
                             val editor = sharedPreference.edit()
+                            editor.putString("id",id)
                             editor.putString("nama",nama)
                             editor.putString("email",email)
                             editor.putString("nomor_telepon",nomor_telepon)
@@ -72,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                             startActivity(intent)
                             finish()
                         }else{
-                            Toast.makeText(this@MainActivity, id, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainActivity, status, Toast.LENGTH_SHORT).show()
                         }
                     }
                 },
